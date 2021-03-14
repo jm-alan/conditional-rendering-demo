@@ -1,20 +1,27 @@
-import React, { useState } from "react";
-import { Redirect } from "react-router-dom";
-import { login } from "../../services/auth";
+import React, { useState } from 'react';
+import { Redirect } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 
-const LoginForm = ({ authenticated, setAuthenticated }) => {
+import { login } from '../../store/session';
+import { ShowLogin, HideLogin } from '../../store/loginModal';
+
+import './LoginModal.css';
+
+const LoginForm = () => {
+  const dispatch = useDispatch();
+  const user = useSelector(state => state.session.user);
+  const modalDisplay = useSelector(state => state.loginModal.display);
+
   const [errors, setErrors] = useState([]);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   const onLogin = async (e) => {
     e.preventDefault();
-    const user = await login(email, password);
-    if (!user.errors) {
-      setAuthenticated(true);
-    } else {
-      setErrors(user.errors);
-    }
+    dispatch(login(email, password))
+      .then(errors => {
+        setErrors(errors);
+      });
   };
 
   const updateEmail = (e) => {
@@ -25,39 +32,58 @@ const LoginForm = ({ authenticated, setAuthenticated }) => {
     setPassword(e.target.value);
   };
 
-  if (authenticated) {
-    return <Redirect to="/" />;
+  if (user) {
+    return <Redirect to='/' />;
   }
 
   return (
-    <form onSubmit={onLogin}>
-      <div>
-        {errors.map((error) => (
-          <div>{error}</div>
-        ))}
-      </div>
-      <div>
-        <label htmlFor="email">Email</label>
-        <input
-          name="email"
-          type="text"
-          placeholder="Email"
-          value={email}
-          onChange={updateEmail}
-        />
-      </div>
-      <div>
-        <label htmlFor="password">Password</label>
-        <input
-          name="password"
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={updatePassword}
-        />
-        <button type="submit">Login</button>
-      </div>
-    </form>
+    <>
+      <button
+        onClick={() => dispatch(ShowLogin())}
+      >
+        Log In
+      </button>
+      {modalDisplay
+        ? (
+          <div
+            className='modal-background'
+            onClick={() => dispatch(HideLogin())}
+          >
+            <form
+              onSubmit={onLogin}
+              onClick={e => e.stopPropagation()}
+            >
+              <div>
+                {errors.map((error, idx) => (
+                  <div key={idx}>{error}</div>
+                ))}
+              </div>
+              <div>
+                <label htmlFor='email'>Email</label>
+                <input
+                  name='email'
+                  type='text'
+                  placeholder='Email'
+                  value={email}
+                  onChange={updateEmail}
+                />
+              </div>
+              <div>
+                <label htmlFor='password'>Password</label>
+                <input
+                  name='password'
+                  type='password'
+                  placeholder='Password'
+                  value={password}
+                  onChange={updatePassword}
+                />
+                <button type='submit'>Login</button>
+              </div>
+            </form>
+          </div>
+          )
+        : null}
+    </>
   );
 };
 
