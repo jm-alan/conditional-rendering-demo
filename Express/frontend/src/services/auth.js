@@ -1,47 +1,39 @@
-export const authenticate = async() => {
-  const response = await fetch('/api/auth/',{
+import csrfetch from '../store/csrf';
+
+export const authenticate = async () => {
+  await csrfetch('/api/csrf/restore');
+  const res = await csrfetch('/api/session/');
+  return res.data.user;
+};
+
+export const login = async (identification, password) => {
+  const res = await csrfetch('/api/session/', {
+    method: 'POST',
     headers: {
       'Content-Type': 'application/json'
-    }
+    },
+    body: JSON.stringify({ identification, password })
   });
-  return await response.json();
-}
+  return res.data.user;
+};
 
-export const login = async (email, password) => {
-  const response = await fetch('/api/auth/login', {
+export const logout = async () => {
+  await csrfetch('/api/session/', {
+    method: 'DELETE'
+  });
+};
+
+export const signUp = async (username, email, password) => {
+  const res = await csrfetch('/api/users/', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
+      username,
       email,
       password
     })
   });
-  return await response.json();
-}
-
-export const logout = async () => {
-  const response = await fetch("/api/auth/logout", {
-    headers: {
-      "Content-Type": "application/json",
-    }
-  });
-  return await response.json();
+  return res.data.user;
 };
-
-
-export const signUp = async (username, email, password) => {
-  const response = await fetch("/api/auth/signup", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      username,
-      email,
-      password,
-    }),
-  });
-  return await response.json();
-}

@@ -15,9 +15,10 @@ module.exports = {
           model: 'Images'
         }
       },
-      firstName: {
+      username: {
         type: Sequelize.STRING(30),
-        allowNull: false
+        allowNull: false,
+        unique: true
       },
       email: {
         type: Sequelize.STRING,
@@ -27,15 +28,6 @@ module.exports = {
       hashedPassword: {
         type: Sequelize.STRING.BINARY,
         allowNull: false
-      },
-      defaultLocale: {
-        type: Sequelize.STRING,
-        allowNull: true
-      },
-      maxPins: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        defaultValue: 50
       },
       createdAt: {
         allowNull: false,

@@ -6,20 +6,20 @@ module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define(
     'User',
     {
-      firstName: {
+      username: {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {
           len: [2, 30],
           isNotEmail (value) {
             if (Validator.isEmail(value)) {
-              throw new Error('Cannot be an email.');
+              throw new Error('Username cannot be an email.');
             }
           },
           isValid (value) {
-            if (value.match(/[^a-zA-Z-]/)) {
+            if (value.match(/[^a-zA-Z-_]/g)) {
               throw new Error(
-                `Currently, first names may only contain the letters A-Z, or a hyphen.
+                `Currently, usernames may only contain the letters A-Z, an underscore, or a hyphen.
                 We apologize for the inconvenience.`
               );
             }
@@ -43,20 +43,12 @@ module.exports = (sequelize, DataTypes) => {
       avatarId: {
         type: DataTypes.INTEGER,
         allowNull: true
-      },
-      defaultLocale: {
-        type: DataTypes.STRING,
-        allowNull: true
-      },
-      maxPins: {
-        type: DataTypes.INTEGER,
-        allowNull: false
       }
     },
     {
       defaultScope: {
         attributes: {
-          exclude: ['defaultLocale', 'hashedPassword', 'email', 'createdAt', 'updatedAt']
+          exclude: ['hashedPassword', 'email', 'createdAt', 'updatedAt']
         }
       },
       scopes: {
@@ -103,8 +95,8 @@ module.exports = (sequelize, DataTypes) => {
   };
 
   User.prototype.toSafeObject = function () {
-    const { id, firstName, email, maxPins, Avatar } = this;
-    return { id, firstName, email, maxPins, Avatar };
+    const { id, username, email, maxPins, Avatar } = this;
+    return { id, username, email, maxPins, Avatar };
   };
 
   User.prototype.validatePassword = function (password) {
@@ -130,10 +122,10 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
 
-  User.signup = async function ({ firstName, email, password, maxPins }) {
+  User.signup = async function ({ username, email, password, maxPins }) {
     const hashedPassword = bcrypt.hashSync(password);
     const user = await User.create({
-      firstName,
+      username,
       email,
       hashedPassword,
       maxPins

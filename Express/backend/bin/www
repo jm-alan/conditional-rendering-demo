@@ -8,10 +8,7 @@ db.sequelize
   .authenticate()
   .then(() => {
     console.log('Sequelize connected.');
-
-    const http = app.listen(port, () => console.log(`UP successful. Bind:${port}...`));
-
-    require('../sockets').attach(http);
+    app.listen(port, () => console.log(`UP successful. Bind:${port}...`));
   })
   .catch(err => {
     console.log('Database connection failure.');
